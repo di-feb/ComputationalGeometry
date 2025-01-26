@@ -1,12 +1,33 @@
 import numpy as np
 from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
+from typing import List, Tuple
 
 
 class Point:
     def __init__(self, x:float, y:float):
-        self.x = x
-        self.y = y
+        self._x = x
+        self._y = y
+
+    # Getter for x
+    @property
+    def x(self) -> float:
+        return self._x
+
+    # Setter for x
+    @x.setter
+    def x(self, value: float):
+        self._x = value
+
+    # Getter for y
+    @property
+    def y(self) -> float:
+        return self._y
+
+    # Setter for y
+    @y.setter
+    def y(self, value: float):
+        self._y = value
 
     def __repr__(self):
         return f"Point(x={self.x}, y={self.y})"
@@ -18,55 +39,63 @@ class Points:
 
     def __repr__(self):
         return f"Points({self.points})"
-    
-    def determinant(self, point1:Point, point2:Point):
-        return point1.x * point2.y - point2.x * point1.y
-    
-    def add_point(self, point: Point):
-        self.points.append(point)
 
     def lexicographical_sort(self):
         self.points.sort(key=lambda p: (p.x, p.y))
-
-    # Converts the points into a numpy array for the ConvexHull 3D function
-    def to_numpy(self):
-        return np.array([(point.x, point.y) for point in self.points])
+    
 class Point3D:
-    def __init__(self, x: float, y: float, z: float):
-        self.x = x
-        self.y = y
-        self.z = z
+    def __init__(self, x, y, z):
+        self._x = x
+        self._y = y
+        self._z = z
+
+    @property
+    def x(self):
+        return self._x
+
+    @x.setter
+    def x(self, value):
+        self._x = value
+
+    @property
+    def y(self):
+        return self._y
+
+    @y.setter
+    def y(self, value):
+        self._y = value
+
+    @property
+    def z(self):
+        return self._z
+
+    @z.setter
+    def z(self, value):
+        self._z = value
 
     def __repr__(self):
-        return f"Point(x={self.x}, y={self.y}, z={self.z})"
+        return f"Point3D(x={self.x}, y={self.y}, z={self.z})"    
 
 class Points3D:
     def __init__(self, points=None):
         self.points = points if points else []
 
-    def __repr__(self):
-        return f"Points({self.points})"
-
+    # Converts the points into a numpy array suitable for ConvexHull
     def to_numpy(self):
-        # Converts the points into a numpy array suitable for ConvexHull
         return np.array([(point.x, point.y, point.z) for point in self.points])
     
+
+# Return the orientation of the triplet (p1, p2, p3).
+# > 0 if counter-clockwise
+# = 0 if collinear
+# < 0 if clockwise
 def orientation(p1: Point, p2: Point, p3: Point) -> float:
-    """
-    Return the orientation of the triplet (p1, p2, p3).
-    > 0 if counter-clockwise
-    = 0 if collinear
-    < 0 if clockwise
-    """
-    return (p2.y - p1.y) * (p3.x - p2.x) - (p2.x - p1.x) * (p3.y - p2.y)
+    return ((p2.x * p3.y) - (p2.y * p3.x)) - ((p1.x * p3.y) - (p1.y * p3.x)) + ((p1.x * p2.y) - (p1.y * p2.x))
 
-
+# Visualizes the set of points and the convex hull.
+# :param points: Points object containing all points.
+# :param hull: Points object containing points on the convex hull.
 def plot_convex_hull(points, hull):
-    """
-    Visualizes the set of points and the convex hull.
-    :param points: Points object containing all points.
-    :param hull: Points object containing points on the convex hull.
-    """
     # Extract x and y coordinates from points
     x_points = [p.x for p in points.points]
     y_points = [p.y for p in points.points]
@@ -89,15 +118,10 @@ def plot_convex_hull(points, hull):
     plt.legend()
     plt.xlabel("X")
     plt.ylabel("Y")
-    plt.title("Convex Hull Visualization")
+    plt.title("Convex Hull")
     plt.savefig("convex_hull.png")
     print("Plot saved as convex_hull.png")
 
-
-
-# Implements the Graham Scan algorithm to find the convex hull.
-# :param points: Points object containing all points.
-# :return: Points object containing points on the convex hull.
 def graham_scan(points: Points) -> Points:    
     def construct_half(points_list):
         # Helper function to construct one half of the hull.
@@ -118,9 +142,6 @@ def graham_scan(points: Points) -> Points:
     # Remove the last point of each half to avoid duplication and combine
     return Points(lower_hull[:-1] + upper_hull[:-1])
 
-# Implements the Gift Wrapping (Jarvis March) algorithm to find the convex hull.
-# :param points: Points object containing all points.
-# :return: Points object containing points on the convex hull.
 def gift_wrapping(points: Points) -> Points:
     if len(points.points) < 3:
         raise ValueError("At least 3 points are required to compute a convex hull.")
@@ -148,33 +169,26 @@ def gift_wrapping(points: Points) -> Points:
             break
 
     return Points(hull)
-
 def divide_and_conquer(points: Points) -> Points:
-    """
-    Implements the Divide and Conquer algorithm to find the convex hull.
-    :param points: Points object containing all points.
-    :return: Points object containing points on the convex hull.
-    """
     def merge_hulls(left_hull, right_hull):
-        """
-        Merge two convex hulls into a single convex hull.
-        :param left_hull: List of Points in the left hull.
-        :param right_hull: List of Points in the right hull.
-        :return: Merged convex hull as a list of Points.
-        """
-        # Find the rightmost point in the left hull and leftmost point in the right hull
-        left_idx = max(range(len(left_hull)), key=lambda i: left_hull[i].x)
-        right_idx = min(range(len(right_hull)), key=lambda i: right_hull[i].x)
+
+        left_hull_len = len(left_hull)
+        right_hull_len = len(right_hull)
+        
+        left_idx = max(range(left_hull_len), key=lambda i: left_hull[i].x)
+        right_idx = min(range(right_hull_len), key=lambda i: right_hull[i].x)
+        print(f"Rightmost point in left hull: {left_hull[left_idx]}")
+        print(f"Leftmost point in right hull: {right_hull[right_idx]}")
 
         # Find the upper tangent
         i, j = left_idx, right_idx
         while True:
             changed = False
-            while orientation(left_hull[i], right_hull[j], right_hull[(j + 1) % len(right_hull)]) < 0:
-                j = (j + 1) % len(right_hull)
+            while orientation(left_hull[i], left_hull[(i + 1) % left_hull_len], right_hull[j]) > 0:
+                i = (i + 1) % left_hull_len
                 changed = True
-            while orientation(right_hull[j], left_hull[i], left_hull[(i - 1) % len(left_hull)]) > 0:
-                i = (i - 1) % len(left_hull)
+            while orientation(right_hull[j], right_hull[(j - 1) % right_hull_len], left_hull[i]) < 0:
+                j = (j - 1) % right_hull_len
                 changed = True
             if not changed:
                 break
@@ -184,11 +198,11 @@ def divide_and_conquer(points: Points) -> Points:
         i, j = left_idx, right_idx
         while True:
             changed = False
-            while orientation(left_hull[i], right_hull[j], right_hull[(j - 1) % len(right_hull)]) > 0:
-                j = (j - 1) % len(right_hull)
+            while orientation(right_hull[j], right_hull[(j - 1) % right_hull_len], left_hull[i]) > 0:
+                j = (j - 1) % right_hull_len
                 changed = True
-            while orientation(right_hull[j], left_hull[i], left_hull[(i + 1) % len(left_hull)]) < 0:
-                i = (i + 1) % len(left_hull)
+            while orientation(left_hull[i], left_hull[(i + 1) % left_hull_len], right_hull[j]) < 0:
+                i = (i + 1) % left_hull_len
                 changed = True
             if not changed:
                 break
@@ -203,25 +217,22 @@ def divide_and_conquer(points: Points) -> Points:
             merged_hull.append(left_hull[i])
             if i == lower_tangent[0]:
                 break
-            i = (i + 1) % len(left_hull)
+            i = (i + 1) % left_hull_len
 
         # Add points from right hull
-        j = lower_tangent[1]
+        i = lower_tangent[1]
         while True:
-            merged_hull.append(right_hull[j])
-            if j == upper_tangent[1]:
+            merged_hull.append(right_hull[i])
+            if i == upper_tangent[1]:
                 break
-            j = (j + 1) % len(right_hull)
+            i = (i + 1) % right_hull_len
 
         return merged_hull
 
+    
     def divide(points_list):
-        """
-        Recursive division of points into halves to compute convex hulls.
-        """
+        # Handle base case: 3 or fewer points
         if len(points_list) <= 3:
-            # Handle base case: 3 or fewer points
-            points_list.sort(key=lambda p: (p.x, p.y))  # Sort to maintain order
             return graham_scan(Points(points_list)).points
 
         # Divide points into two halves
@@ -231,30 +242,23 @@ def divide_and_conquer(points: Points) -> Points:
 
         # Merge the two hulls
         return merge_hulls(left_hull, right_hull)
-
+    
     # Sort points by x-coordinate
-    points.points.sort(key=lambda p: (p.x, p.y))
+    points.lexicographical_sort()
+    print(points)
     return Points(divide(points.points))
 
 def quickhull(points: Points) -> Points:
-    """
-    Implements the QuickHull algorithm to find the convex hull.
-    :param points: Points object containing all points.
-    :return: Points object containing points on the convex hull.
-    """
     if len(points.points) < 3:
         raise ValueError("At least 3 points are required to compute a convex hull.")
 
+    # Find the point furthest from the line formed by p1 and p2.
     def find_furthest_point(points, p1, p2):
-        """
-        Find the point furthest from the line formed by p1 and p2.
-        """
         max_distance = -1
         furthest_point = None
 
         for point in points:
-            distance = abs((p2.y - p1.y) * point.x - (p2.x - p1.x) * point.y + p2.x * p1.y - p2.y * p1.x)
-            distance /= ((p2.y - p1.y)**2 + (p2.x - p1.x)**2)**0.5
+            distance = abs((p2.y - p1.y) * point.x - (p2.x - p1.x) * point.y + p2.x * p1.y - p2.y * p1.x) / ((p2.y - p1.y)**2 + (p2.x - p1.x)**2)**0.5
 
             if distance > max_distance:
                 max_distance = distance
@@ -262,20 +266,15 @@ def quickhull(points: Points) -> Points:
 
         return furthest_point
 
-    def points_on_side(points, p1, p2):
-        """
-        Filter points that are on the left side of the line formed by p1 and p2.
-        """
+    # Filter points that are on the left side of the line formed by p1 and p2.
+    def points_on_side(points, p1, p2):        
         side_points = []
         for point in points:
-            if orientation(p1, p2, point) > 0:
-                side_points.append(point)
+            orientation(p1, p2, point) > 0 and side_points.append(point)
         return side_points
 
+    # Recursive function to find hull points on one side of the line formed by p1 and p2.
     def find_hull(points, p1, p2, hull):
-        """
-        Recursive function to find hull points on one side of the line formed by p1 and p2.
-        """
         if not points:
             return
 
@@ -307,26 +306,9 @@ def quickhull(points: Points) -> Points:
     # Step 4: Remove duplicates and return the sorted hull
     unique_hull = sorted(set(hull), key=lambda p: (p.x, p.y))
     return Points(unique_hull)
-
-# Function to compute the convex hull using QuickHull (via scipy)
-def quickhull_3D(points: Points):
-    # Convert Points object to numpy array
-    points_array = points.to_numpy()
-
-    # Compute the convex hull using SciPy's ConvexHull function
-    hull = ConvexHull(points_array)
-
-    # The result contains the indices of the points forming the convex hull
-    convex_hull_points = [points.points[i] for i in hull.vertices]
-    
-    return convex_hull_points
-
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib.pyplot as plt
-import numpy as np
-
-def plot_convex_hull_3D(points: Points, convex_hull):
-    # Convert Points object to numpy array for plotting
+     
+def plot_convex_hull_3D(points: Points3D):
+    # Convert Points3D object to NumPy array for plotting
     points_array = points.to_numpy()
 
     # Create a 3D plot
@@ -337,7 +319,6 @@ def plot_convex_hull_3D(points: Points, convex_hull):
     ax.scatter(points_array[:, 0], points_array[:, 1], points_array[:, 2], color='blue', label='Points')
 
     # Plot the convex hull facets
-    hull_points_array = np.array([(p.x, p.y, p.z) for p in convex_hull])
     for simplex in ConvexHull(points_array).simplices:
         # Get the vertices of the simplex
         vertices = points_array[simplex]
@@ -354,9 +335,6 @@ def plot_convex_hull_3D(points: Points, convex_hull):
     plt.legend()
     plt.savefig("convex_hull_3D.png")
     print("3D plot saved as convex_hull_3D.png")
-
-from typing import List, Tuple
-
 class LinearConstraint:
     def __init__(self, a: float, b: float, c: float):
         """
@@ -446,57 +424,57 @@ if __name__ == "__main__":
 
     # Replace 'points.txt' with the actual file path
     points = read_points_from_file('points_2.txt')
-    points = read_points_from_file_3D('points3D.txt')
+    # points3D = read_points_from_file_3D('points3D.txt')
     # convex_hull = graham_scan(points)
     # convex_hull = gift_wrapping(points)
+    convex_hull = divide_and_conquer(points)
     # convex_hull = quickhull(points)
-    convex_hull = quickhull_3D(points)
 
     # print(f"Convex Hull: {convex_hull}")
-    # plot_convex_hull(points, convex_hull) 
-    plot_convex_hull_3D(points, convex_hull) 
+    plot_convex_hull(points, convex_hull) 
+    # plot_convex_hull_3D(points3D) 
 
-     # Solve the linear programming problem
-    constraints = [
-        LinearConstraint(-2, 1, 12),
-        LinearConstraint(-1, 3, 3),
-        LinearConstraint(6, 7, 18),
-        LinearConstraint(3, -12, -8),
-        LinearConstraint(2, -7, 35),
-        LinearConstraint(-1, 8, 29),
-        LinearConstraint(2, -6, 9),
-        LinearConstraint(-1, 0, 0),
-        LinearConstraint(0, -1, 0)
-    ]
+    # # Solve the linear programming problem
+    # constraints = [
+    #     LinearConstraint(-2, 1, 12),
+    #     LinearConstraint(-1, 3, 3),
+    #     LinearConstraint(6, 7, 18),
+    #     LinearConstraint(3, -12, -8),
+    #     LinearConstraint(2, -7, 35),
+    #     LinearConstraint(-1, 8, 29),
+    #     LinearConstraint(2, -6, 9),
+    #     LinearConstraint(-1, 0, 0),
+    #     LinearConstraint(0, -1, 0)
+    # ]
 
-    # Define the objective function
-    objective = (3, -10)
+    # # Define the objective function
+    # objective = (3, -10)
 
-    # Solve using the incremental algorithm
-    optimal_point = solve_linear_program(constraints, objective)
+    # # Solve using the incremental algorithm
+    # optimal_point = solve_linear_program(constraints, objective)
 
-    print(f"Optimal Point: {optimal_point}")
+    # print(f"Optimal Point: {optimal_point}")
 
-    # Plot the feasible region and solution
-    def plot_feasible_region(constraints, optimal_point):
-        x_vals = np.linspace(-5, 20, 500)
-        y_vals = np.linspace(-5, 20, 500)
-        X, Y = np.meshgrid(x_vals, y_vals)
+    # # Plot the feasible region and solution
+    # def plot_feasible_region(constraints, optimal_point):
+    #     x_vals = np.linspace(-5, 20, 500)
+    #     y_vals = np.linspace(-5, 20, 500)
+    #     X, Y = np.meshgrid(x_vals, y_vals)
         
-        plt.figure(figsize=(10, 8))
-        plt.title("Feasible Region and Optimal Solution")
+    #     plt.figure(figsize=(10, 8))
+    #     plt.title("Feasible Region and Optimal Solution")
         
-        for constraint in constraints:
-            Z = constraint.a * X + constraint.b * Y - constraint.c
-            plt.contour(X, Y, Z, levels=[0], colors='blue', linestyles='dotted')
+    #     for constraint in constraints:
+    #         Z = constraint.a * X + constraint.b * Y - constraint.c
+    #         plt.contour(X, Y, Z, levels=[0], colors='blue', linestyles='dotted')
         
-        plt.scatter(optimal_point[0], optimal_point[1], color='red', label='Optimal Solution')
-        plt.xlabel("x1")
-        plt.ylabel("x2")
-        plt.legend()
-        plt.grid()
-        plt.savefig("linear_prog.png")
-        print("linear prog solved in linear_prog.png")
+    #     plt.scatter(optimal_point[0], optimal_point[1], color='red', label='Optimal Solution')
+    #     plt.xlabel("x1")
+    #     plt.ylabel("x2")
+    #     plt.legend()
+    #     plt.grid()
+    #     plt.savefig("linear_prog.png")
+    #     print("linear prog solved in linear_prog.png")
 
-    plot_feasible_region(constraints, optimal_point)
+    # plot_feasible_region(constraints, optimal_point)
 
