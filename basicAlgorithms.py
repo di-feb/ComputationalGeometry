@@ -169,6 +169,7 @@ def gift_wrapping(points: Points) -> Points:
             break
 
     return Points(hull)
+
 def divide_and_conquer(points: Points) -> Points:
     def merge_hulls(left_hull, right_hull):
 
@@ -177,17 +178,15 @@ def divide_and_conquer(points: Points) -> Points:
         
         left_idx = max(range(left_hull_len), key=lambda i: left_hull[i].x)
         right_idx = min(range(right_hull_len), key=lambda i: right_hull[i].x)
-        print(f"Rightmost point in left hull: {left_hull[left_idx]}")
-        print(f"Leftmost point in right hull: {right_hull[right_idx]}")
 
         # Find the upper tangent
         i, j = left_idx, right_idx
         while True:
             changed = False
-            while orientation(left_hull[i], left_hull[(i + 1) % left_hull_len], right_hull[j]) > 0:
+            if(orientation(right_hull[j], left_hull[i], left_hull[(i + 1) % left_hull_len]) > 0):
                 i = (i + 1) % left_hull_len
                 changed = True
-            while orientation(right_hull[j], right_hull[(j - 1) % right_hull_len], left_hull[i]) < 0:
+            if(orientation(left_hull[i], right_hull[j], right_hull[ (j - 1) % right_hull_len]) < 0):
                 j = (j - 1) % right_hull_len
                 changed = True
             if not changed:
@@ -198,14 +197,15 @@ def divide_and_conquer(points: Points) -> Points:
         i, j = left_idx, right_idx
         while True:
             changed = False
-            while orientation(right_hull[j], right_hull[(j - 1) % right_hull_len], left_hull[i]) > 0:
-                j = (j - 1) % right_hull_len
+            if(orientation(left_hull[i], right_hull[j], right_hull[(j + 1) % right_hull_len] ) > 0 ):
+                j = (j + 1) % right_hull_len
                 changed = True
-            while orientation(left_hull[i], left_hull[(i + 1) % left_hull_len], right_hull[j]) < 0:
-                i = (i + 1) % left_hull_len
+            if(orientation(right_hull[j], left_hull[i], left_hull[(i - 1) % left_hull_len]) < 0):
+                i = (i - 1) % left_hull_len
                 changed = True
             if not changed:
                 break
+
         lower_tangent = (i, j)
 
         # Combine points from both hulls between the tangents
@@ -245,67 +245,8 @@ def divide_and_conquer(points: Points) -> Points:
     
     # Sort points by x-coordinate
     points.lexicographical_sort()
-    print(points)
     return Points(divide(points.points))
 
-def quickhull(points: Points) -> Points:
-    if len(points.points) < 3:
-        raise ValueError("At least 3 points are required to compute a convex hull.")
-
-    # Find the point furthest from the line formed by p1 and p2.
-    def find_furthest_point(points, p1, p2):
-        max_distance = -1
-        furthest_point = None
-
-        for point in points:
-            distance = abs((p2.y - p1.y) * point.x - (p2.x - p1.x) * point.y + p2.x * p1.y - p2.y * p1.x) / ((p2.y - p1.y)**2 + (p2.x - p1.x)**2)**0.5
-
-            if distance > max_distance:
-                max_distance = distance
-                furthest_point = point
-
-        return furthest_point
-
-    # Filter points that are on the left side of the line formed by p1 and p2.
-    def points_on_side(points, p1, p2):        
-        side_points = []
-        for point in points:
-            orientation(p1, p2, point) > 0 and side_points.append(point)
-        return side_points
-
-    # Recursive function to find hull points on one side of the line formed by p1 and p2.
-    def find_hull(points, p1, p2, hull):
-        if not points:
-            return
-
-        # Find the furthest point from the line formed by p1 and p2
-        furthest = find_furthest_point(points, p1, p2)
-
-        hull.append(furthest)
-
-        # Partition points into two sets: left of (p1, furthest) and (furthest, p2)
-        left_of_p1_furthest = points_on_side(points, p1, furthest)
-        left_of_furthest_p2 = points_on_side(points, furthest, p2)
-
-        find_hull(left_of_p1_furthest, p1, furthest, hull)
-        find_hull(left_of_furthest_p2, furthest, p2, hull)
-
-    # Step 1: Find the leftmost and rightmost points (guaranteed to be on the hull)
-    leftmost = min(points.points, key=lambda p: p.x)
-    rightmost = max(points.points, key=lambda p: p.x)
-
-    # Step 2: Divide points into two sets: above and below the line (leftmost, rightmost)
-    above = points_on_side(points.points, leftmost, rightmost)
-    below = points_on_side(points.points, rightmost, leftmost)
-
-    # Step 3: Find hull points recursively
-    hull = [leftmost, rightmost]
-    find_hull(above, leftmost, rightmost, hull)
-    find_hull(below, rightmost, leftmost, hull)
-
-    # Step 4: Remove duplicates and return the sorted hull
-    unique_hull = sorted(set(hull), key=lambda p: (p.x, p.y))
-    return Points(unique_hull)
      
 def plot_convex_hull_3D(points: Points3D):
     # Convert Points3D object to NumPy array for plotting
@@ -335,73 +276,7 @@ def plot_convex_hull_3D(points: Points3D):
     plt.legend()
     plt.savefig("convex_hull_3D.png")
     print("3D plot saved as convex_hull_3D.png")
-class LinearConstraint:
-    def __init__(self, a: float, b: float, c: float):
-        """
-        Represents a linear constraint of the form:
-        a * x + b * y <= c
-        """
-        self.a = a
-        self.b = b
-        self.c = c
 
-    def __repr__(self):
-        return f"{self.a} * x + {self.b} * y <= {self.c}"
-
-def intersection(line1: LinearConstraint, line2: LinearConstraint) -> Tuple[float, float]:
-    """
-    Finds the intersection point of two lines (ignoring constraints for now).
-    Solves the system:
-        line1.a * x + line1.b * y = line1.c
-        line2.a * x + line2.b * y = line2.c
-    """
-    det = line1.a * line2.b - line2.a * line1.b
-    if det == 0:
-        raise ValueError("Lines are parallel or coincident")
-
-    x = (line2.b * line1.c - line1.b * line2.c) / det
-    y = (line1.a * line2.c - line2.a * line1.c) / det
-    return (x, y)
-
-def is_point_feasible(point: Tuple[float, float], constraints: List[LinearConstraint]) -> bool:
-    """
-    Checks if a given point satisfies all the constraints.
-    """
-    for constraint in constraints:
-        if constraint.a * point[0] + constraint.b * point[1] > constraint.c:
-            return False
-    return True
-
-def solve_linear_program(constraints: List[LinearConstraint], objective: Tuple[float, float]) -> Tuple[float, float]:
-    """
-    Solves the 2D linear programming problem incrementally:
-    - constraints: List of LinearConstraint (a, b, c)
-    - objective: Coefficients of the objective function to maximize (cx, cy)
-    Returns:
-        The optimal point (x, y).
-    """
-    if not constraints:
-        raise ValueError("No constraints provided")
-
-    # Step 1: Start with the first two constraints
-    feasible_region = []
-    for i, constraint1 in enumerate(constraints):
-        for j, constraint2 in enumerate(constraints):
-            if i < j:
-                try:
-                    inter = intersection(constraint1, constraint2)
-                    if is_point_feasible(inter, constraints):
-                        feasible_region.append(inter)
-                except ValueError:
-                    continue
-
-    if not feasible_region:
-        raise ValueError("No feasible region exists")
-
-    # Step 2: Evaluate the objective function at all feasible points
-    cx, cy = objective
-    optimal_point = max(feasible_region, key=lambda point: cx * point[0] + cy * point[1])
-    return optimal_point
 
 
 # Example usage:
@@ -430,51 +305,7 @@ if __name__ == "__main__":
     convex_hull = divide_and_conquer(points)
     # convex_hull = quickhull(points)
 
-    # print(f"Convex Hull: {convex_hull}")
     plot_convex_hull(points, convex_hull) 
     # plot_convex_hull_3D(points3D) 
 
-    # # Solve the linear programming problem
-    # constraints = [
-    #     LinearConstraint(-2, 1, 12),
-    #     LinearConstraint(-1, 3, 3),
-    #     LinearConstraint(6, 7, 18),
-    #     LinearConstraint(3, -12, -8),
-    #     LinearConstraint(2, -7, 35),
-    #     LinearConstraint(-1, 8, 29),
-    #     LinearConstraint(2, -6, 9),
-    #     LinearConstraint(-1, 0, 0),
-    #     LinearConstraint(0, -1, 0)
-    # ]
-
-    # # Define the objective function
-    # objective = (3, -10)
-
-    # # Solve using the incremental algorithm
-    # optimal_point = solve_linear_program(constraints, objective)
-
-    # print(f"Optimal Point: {optimal_point}")
-
-    # # Plot the feasible region and solution
-    # def plot_feasible_region(constraints, optimal_point):
-    #     x_vals = np.linspace(-5, 20, 500)
-    #     y_vals = np.linspace(-5, 20, 500)
-    #     X, Y = np.meshgrid(x_vals, y_vals)
-        
-    #     plt.figure(figsize=(10, 8))
-    #     plt.title("Feasible Region and Optimal Solution")
-        
-    #     for constraint in constraints:
-    #         Z = constraint.a * X + constraint.b * Y - constraint.c
-    #         plt.contour(X, Y, Z, levels=[0], colors='blue', linestyles='dotted')
-        
-    #     plt.scatter(optimal_point[0], optimal_point[1], color='red', label='Optimal Solution')
-    #     plt.xlabel("x1")
-    #     plt.ylabel("x2")
-    #     plt.legend()
-    #     plt.grid()
-    #     plt.savefig("linear_prog.png")
-    #     print("linear prog solved in linear_prog.png")
-
-    # plot_feasible_region(constraints, optimal_point)
-
+    
