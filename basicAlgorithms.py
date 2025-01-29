@@ -334,8 +334,20 @@ def find_convex_hull(algorithm, points: List[Point]):
     elapsed_time = end_time - start_time
     return result, elapsed_time
 
+# ----------------------------------------------------- Dynamic Programing -----------------------------------------------------
 
 
+# Represents a linear constraint of the form:
+# a * x + b * y -c <= 0
+
+# Without loss of generality, we assume:
+# 1) min f(x)
+# 2) Hi(x) <= 0,   i = 1, 2, ..., n
+
+# This represents minimizing the function f(x), subject to the constraints
+# Hi(x) <= 0 for i = 1, 2, ..., n.
+
+    
 # Example usage:
 if __name__ == "__main__":
     def read_points_from_file(file_path: str):
@@ -387,5 +399,11 @@ if __name__ == "__main__":
     print(f"Execution time: {time_taken:.6f} seconds")
     plot_convex_hull(points, hull) 
     # plot_convex_hull_3D(points3D) 
+
+    optimal_point, optimal_value = seidel_lp(objective, constraints)
+
+    # Print results
+    print("Optimal Point:", optimal_point)
+    print("Optimal Value:", optimal_value)
 
     
