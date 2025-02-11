@@ -246,9 +246,13 @@ def divide_and_conquer(points: List[Point]) -> List[Point]:
     lexicographical_sort(points)
     return divide(points)
 
-def sort_points_by_angle(points: List[Point], centroid: Point) -> List[Point]:
+def sort_points_by_angle(points: List[Point]) -> List[Point]:
     def angle(p: Point) -> float:
         return math.atan2(p.y - centroid.y, p.x - centroid.x)
+    hull_len = len(points)
+    avg_x = sum(p.x for p in points) / hull_len
+    avg_y = sum(p.y for p in points) / hull_len
+    centroid = Point(avg_x, avg_y)
     return sorted(points, key=angle)
 
 def quickhull(points: List[Point]) -> List[Point]:
@@ -286,13 +290,8 @@ def quickhull(points: List[Point]) -> List[Point]:
     find_hull(min_point, max_point, left_set, hull)
     find_hull(max_point, min_point, right_set, hull)
 
-    hull_len = len(hull)
-    avg_x = sum(p.x for p in hull) / hull_len
-    avg_y = sum(p.y for p in hull) / hull_len
-    centroid = Point(avg_x, avg_y)
-
     # Sort the points in counter-clockwise order based on their angle to the centroid
-    sorted_hull = sort_points_by_angle(hull, centroid)
+    sorted_hull = sort_points_by_angle(hull)
 
     return sorted_hull
 
@@ -399,11 +398,5 @@ if __name__ == "__main__":
     print(f"Execution time: {time_taken:.6f} seconds")
     plot_convex_hull(points, hull) 
     # plot_convex_hull_3D(points3D) 
-
-    optimal_point, optimal_value = seidel_lp(objective, constraints)
-
-    # Print results
-    print("Optimal Point:", optimal_point)
-    print("Optimal Value:", optimal_value)
 
     
