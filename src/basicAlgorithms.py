@@ -74,7 +74,7 @@ def plot_convex_hull(points, hull):
     plt.xlabel("X")
     plt.ylabel("Y")
     plt.title("Convex Hull")
-    plt.savefig("convex_hull.png")
+    plt.savefig("../images/convex_hull.png")
     print("Plot saved as convex_hull.png")
 
 def graham_scan(points:List[Point]) -> List[Point]:    

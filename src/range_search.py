@@ -70,6 +70,6 @@ if __name__ == "__main__":
     if found_points.size > 0:
         plt.scatter(found_points[:, 0], found_points[:, 1], c='blue', s=80, label="Found Points")
 
-    plt.title("Kd-tree and range search")
     plt.legend()
-    plt.savefig("range_search.png")
+    plt.title("Kd-tree and range search")
+    plt.savefig("../images/range_search.png")

@@ -69,5 +69,5 @@ if __name__ == "__main__":
     plt.ylim(0, 1)
     plot_kdtree(kd_tree, 0, 1, 0, 1)
     plt.title("Kd-tree")
-    plt.savefig("Kd-tree.png")
+    plt.savefig("../images/kd-tree.png")
 
