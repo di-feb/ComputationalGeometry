@@ -80,7 +80,6 @@ This will generate an image of the **critical area** of the solution space, save
 
 - Uses **interior-point methods** or **simplex methods**.
 - The method automatically chooses the best approach based on the problem structure.
-- Efficient for solving **high-dimensional** linear programming problems.
 - Complexity depends on the method chosen:
   - Simplex: **Worst-case exponential, but works well in practice**.
   - Interior-Point: **Polynomial time** (approximately O(n³) for dense problems).
@@ -89,6 +88,8 @@ This will generate an image of the **critical area** of the solution space, save
 ## **Exercise 3: Voronoi Diagram & Delaunay Triangulation**
 
 We explored the relationship between **Voronoi Diagrams** and **Delaunay Triangulations** using `scipy.spatial`.
+- A **Voronoi diagram** partitions the plane into regions, where each region corresponds to the area closest to a given point.
+- A **Delaunay triangulation** is a triangulation of the points such that no point is inside the circumcircle of any triangle.
 
 #### **How to Run:**
 
@@ -111,6 +112,36 @@ and save them in `voronoi_delaunay.png`.
 - `Delaunay()` – Constructs the Delaunay triangulation.
 - `voronoi_plot_2d()` – Plots the Voronoi diagram.
 - `delaunay_plot_2d()` – Plots the Delaunay triangulation.
+
+### **Complexity Analysis of Voronoi Diagram and Delaunay Triangulation**
+
+### 1. Voronoi Diagram Complexity
+- **Time Complexity**: The best-known algorithms for computing the Voronoi diagram has **`O(n log n)`** complexity one of them is divide-and-conquer.
+  - Other methods, such as divide-and-conquer, also achieve **`O(n log n)`** complexity.
+- **Space Complexity**:
+  - Stores approximately **`O(n)`** edges and **`O(n)`** regions, so the space complexity is **`O(n)`**.
+
+### 2. Delaunay Triangulation Complexity
+- **Time Complexity**: The most efficient Delaunay triangulation algorithms run in **`O(n log n)`** time.
+  - In the worst case (for special degenerate cases), some algorithms may reach **`O(n^2)`**, but this is rare in practical scenarios.
+- **Space Complexity**:
+  - A Delaunay triangulation consists of **`O(n)`** triangles and edges, leading to **`O(n)`** space complexity.
+
+### Effect of Increasing Number of Points \( n \)
+- **For small \( n \)**, both structures are computed efficiently.
+- **As \( n \) grows**, both the Voronoi diagram and Delaunay triangulation scale at **`O(n log n)`**, meaning:
+  - **Doubling \( n \) only increases runtime slightly more than double**, making it feasible for large datasets.
+  - **Memory usage increases linearly** with \( n \).
+
+
+### Final Complexity Summary
+
+| Algorithm              | Time Complexity | Space Complexity |
+|------------------------|-----------------|------------------|
+| Voronoi Diagram        | `O(n log n)`    | `O(n)`           |
+| Delaunay Triangulation | `O(n log n)`    | `O(n)`           |
+
+Since both algorithms have similar complexity, their performance depends more on implementation details and dataset properties.
 
 ## **Exercise 4: KD-Tree & Range Searching**
 
