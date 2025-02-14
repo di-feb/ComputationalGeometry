@@ -42,12 +42,10 @@ This will compute the convex hull using QuickHull on 100 points and save the res
 | Divide & Conquer | 0.000207       | 0.000445        | 0.002025        | 0.003687        | 
 | QuickHull        | 0.000290       | 0.000425        | 0.002171        | 0.003499        | 
 
-- **Graham's Scan:** Runs in **O(n log n)** time due to sorting.
-- **Gift Wrapping:** Runs in **O(nh)** time, where *h* is the number of hull points (slower for large sets).
-- **Divide & Conquer:** Runs in **O(n log n)** time.
-- **QuickHull:** Runs in **O(n log n)** on average, but worst-case **O(n²)**.
-
-As you will se all the algorithms returns the same convex hull.  
+- `Graham’s Scan` and `Divide & Conquer` perform similarly with an `O(n log n)` complexity.
+- `Gift Wrapping (Jarvis March)` is `slower`, particularly for large datasets, due to its `O(nh)` complexity, where h is the number of hull points.
+- `QuickHull` has good average-case performance but may degrade to `O(n^2)` in the worst case
+- As you will see after running all the scripts all the algorithms returns the same convex hull.  
 
 ### **3D Convex Hull**
 
@@ -145,7 +143,22 @@ Since both algorithms have similar complexity, their performance depends more on
 
 ## **Exercise 4: KD-Tree & Range Searching**
 
-We implemented a **kd-tree** to perform efficient **range searching**.
+###  Kd-tree.
+
+#### At first for a set of points we created a Kd-tree.
+
+```sh
+python3 ./kd_tree.py <num_of_points>
+```
+
+Example:
+
+```sh
+python3 ./kd_tree.py 20
+```
+### range search
+
+#### And then for a set of 150 points we implemented a kd-tree and run a range search to find all the points inside this specific range.
 
 ### **How to Run:**
 
@@ -162,12 +175,7 @@ Example:
 python3 range_search.py 42 0.2 0.8 0.3 0.7
 ```
 
-1. Generate **150 random points**.
-2. Build a **kd-tree**.
-3. Perform a **range search** within the given rectangle.
-4. Save the output in `range_search.png`.
-
-### **KD-Tree Complexity:**
+### **Complexities:**
 
 - **Construction:** **O(n log n)** (there is sorting at each level).
 - **Range Search:** **O(√n) to O(n)**, depending on query size.
