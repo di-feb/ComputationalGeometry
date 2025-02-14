@@ -35,12 +35,12 @@ This will compute the convex hull using QuickHull on 100 points and save the res
 
 ### **Performance Comparison:**
 
-| Algorithm        | Avg Execution Time (ms) |
-| ---------------- | ----------------------- |
-| Graham's Scan    | TBD                     |
-| Gift Wrapping    | TBD                     |
-| Divide & Conquer | TBD                     |
-| QuickHull        | TBD                     |
+| Algorithm        | 50 Points | 100 Points | 500 Points | 1000 Points |
+|------------------|-----------|------------|------------|-------------|
+| Graham's Scan    | 0.000142       | 0.000257        | 0.001304        | 0.002945        |
+| Gift Wrapping    | 0.000426       | 0.000535        | 0.004335        | 0.010895        |
+| Divide & Conquer | 0.000207       | 0.000445        | 0.002025        | 0.003687        | 
+| QuickHull        | 0.000290       | 0.000425        | 0.002171        | 0.003499        | 
 
 - **Graham's Scan:** Runs in **O(n log n)** time due to sorting.
 - **Gift Wrapping:** Runs in **O(nh)** time, where *h* is the number of hull points (slower for large sets).

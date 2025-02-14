@@ -18,12 +18,12 @@ def range_search(node: KDNode | None, xmin: float, xmax: float, ymin: float, yma
     if node.axis == 0:
         if xmin <= x:
             range_search(node.left, xmin, xmax, ymin, ymax, found)
-        if xmax >= x:
+        if xmax > x:
             range_search(node.right, xmin, xmax, ymin, ymax, found)
     else:
         if ymin <= y:
             range_search(node.left, xmin, xmax, ymin, ymax, found)
-        if ymax >= y:
+        if ymax > y:
             range_search(node.right, xmin, xmax, ymin, ymax, found)
 
 if __name__ == "__main__":  

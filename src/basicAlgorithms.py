@@ -297,9 +297,9 @@ if __name__ == "__main__":
     hull, time_taken = find_convex_hull(selected_algorithm, points)
 
     # Output results
-    print(f"Algorithm: {args.algorithm}")
-    print(f"Number of points: {args.num_points}")
-    print(f"Execution time: {time_taken:.6f} seconds")
+    print(f"Algorithm         | {args.algorithm}")
+    print(f"Number of points  | {args.num_points}")
+    print(f"Execution time:   | {time_taken:.6f} seconds")
     plot_convex_hull(points, hull) 
    
 
