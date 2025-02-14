@@ -1,5 +1,3 @@
-import numpy as np
-from scipy.spatial import ConvexHull
 import matplotlib.pyplot as plt
 import argparse
 import math
@@ -34,48 +32,6 @@ class Point:
 
     def __repr__(self):
         return f"Point(x={self.x}, y={self.y})"
-    
-class Point3D:
-    def __init__(self, x, y, z):
-        self._x = x
-        self._y = y
-        self._z = z
-
-    @property
-    def x(self):
-        return self._x
-
-    @x.setter
-    def x(self, value):
-        self._x = value
-
-    @property
-    def y(self):
-        return self._y
-
-    @y.setter
-    def y(self, value):
-        self._y = value
-
-    @property
-    def z(self):
-        return self._z
-
-    @z.setter
-    def z(self, value):
-        self._z = value
-
-    def __repr__(self):
-        return f"Point3D(x={self.x}, y={self.y}, z={self.z})"    
-
-class Points3D:
-    def __init__(self, points=None):
-        self.points = points if points else []
-
-    # Converts the points into a numpy array suitable for ConvexHull
-    def to_numpy(self):
-        return np.array([(point.x, point.y, point.z) for point in self.points])
-    
 
 # Return the orientation of the triplet (p1, p2, p3).
 # > 0 if counter-clockwise
@@ -295,59 +251,15 @@ def quickhull(points: List[Point]) -> List[Point]:
 
     return sorted_hull
 
-     
-def plot_convex_hull_3D(points: Points3D):
-    # Convert Points3D object to NumPy array for plotting
-    points_array = points.to_numpy()
-
-    # Create a 3D plot
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-
-    # Plot the points
-    ax.scatter(points_array[:, 0], points_array[:, 1], points_array[:, 2], color='blue', label='Points')
-
-    # Plot the convex hull facets
-    for simplex in ConvexHull(points_array).simplices:
-        # Get the vertices of the simplex
-        vertices = points_array[simplex]
-        # Plot the simplex as a triangle
-        ax.plot_trisurf(vertices[:, 0], vertices[:, 1], vertices[:, 2], color='red', alpha=0.5)
-
-    # Set labels and title
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_zlabel('Z')
-    ax.set_title('3D Convex Hull')
-
-    # Add a legend and save the plot
-    plt.legend()
-    plt.savefig("convex_hull_3D.png")
-    print("3D plot saved as convex_hull_3D.png")
-
 def find_convex_hull(algorithm, points: List[Point]):
-    """Measure the execution time of a convex hull algorithm."""
     start_time = time.time()
     result = algorithm(points)
     end_time = time.time()
     elapsed_time = end_time - start_time
     return result, elapsed_time
 
-# ----------------------------------------------------- Dynamic Programing -----------------------------------------------------
 
 
-# Represents a linear constraint of the form:
-# a * x + b * y -c <= 0
-
-# Without loss of generality, we assume:
-# 1) min f(x)
-# 2) Hi(x) <= 0,   i = 1, 2, ..., n
-
-# This represents minimizing the function f(x), subject to the constraints
-# Hi(x) <= 0 for i = 1, 2, ..., n.
-
-    
-# Example usage:
 if __name__ == "__main__":
     def read_points_from_file(file_path: str):
         points = []
@@ -356,14 +268,6 @@ if __name__ == "__main__":
                 x, y = map(float, line.split())
                 points.append(Point(x, y))
         return points
-    
-    def read_points_from_file_3D(file_path: str):
-        points = []
-        with open(file_path, 'r') as file:
-            for line in file:
-                x, y, z = map(float, line.split())
-                points.append(Point3D(x, y, z))
-        return Points3D(points)
     
     parser = argparse.ArgumentParser(description="Run convex hull algorithms.")
     parser.add_argument(
@@ -388,7 +292,7 @@ if __name__ == "__main__":
 
     # Run the selected algorithm
     selected_algorithm = algorithms[args.algorithm]
-    file_name = f"points_{args.num_points}.txt"
+    file_name = f"../points/points_{args.num_points}.txt"
     points = read_points_from_file(file_name)
     hull, time_taken = find_convex_hull(selected_algorithm, points)
 
@@ -397,6 +301,6 @@ if __name__ == "__main__":
     print(f"Number of points: {args.num_points}")
     print(f"Execution time: {time_taken:.6f} seconds")
     plot_convex_hull(points, hull) 
-    # plot_convex_hull_3D(points3D) 
+   
 
     

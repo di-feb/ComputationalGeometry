@@ -47,6 +47,8 @@ This will compute the convex hull using QuickHull on 100 points and save the res
 - **Divide & Conquer:** Runs in **O(n log n)** time.
 - **QuickHull:** Runs in **O(n log n)** on average, but worst-case **O(n²)**.
 
+As you will se all the algorithms returns the same convex hull.  
+
 ### **3D Convex Hull**
 
 We also implemented a **3D convex hull** using `scipy.spatial.ConvexHull`.  
